@@ -1,0 +1,23 @@
+[package]
+name = "pomotodo"
+version = "0.1.0"
+authors = ["KAMx <kevin.xjy@gmail.com>"]
+description = "Unofficial Pomotodo API for Rust Programming Language."
+
+[dependencies]
+chrono = { version = "0.3", features = ["serde"] }
+hyper = "0.10"
+hyper-native-tls = "0.2"
+serde = "0.9"
+serde_json = "0.9"
+serde_derive = "0.9"
+uuid = { version = "0.4", features = ["serde"] }
+clippy = {version = "*", optional = true}
+
+[[bin]]
+name = "pomotodo-dev"
+path = "src/main.rs"
+
+[[test]]
+name = "test"
+path = "tests/mod.rs"
