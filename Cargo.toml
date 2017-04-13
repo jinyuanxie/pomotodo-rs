@@ -14,10 +14,6 @@ serde_derive = "0.9"
 uuid = { version = "0.4", features = ["serde"] }
 clippy = {version = "*", optional = true}
 
-[[bin]]
-name = "pomotodo-dev"
-path = "src/main.rs"
-
 [[test]]
 name = "test"
 path = "tests/mod.rs"
