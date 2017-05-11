@@ -1,3 +1,17 @@
+//Copyright 2017 KAMYUEN
+//
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+
 extern crate serde_json;
 
 use std::fmt;
@@ -11,13 +25,13 @@ use ::ShouldSkip;
 #[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
 pub struct Pomo {
     /// The unique id of the `Pomo`.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub uuid: Option<Uuid>,
     /// The create time of the `Pomo`.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub created_at: Option<DateTime<UTC>>,
     /// The update time of the `Pomo`.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub updated_at: Option<DateTime<UTC>>,
     /// The description of the `Pomo`.
     pub description: String,
@@ -27,20 +41,20 @@ pub struct Pomo {
     pub ended_at: DateTime<UTC>,
     /// The local started time of the `Pomo`.
     /// Notice: **Stored in UTC format.**
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub local_started_at: Option<DateTime<UTC>>,
     /// The local ended time of the `Pomo`.
     /// Notice: **Store in UTC format.**
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub local_ended_at: Option<DateTime<UTC>>,
     /// The duration(in second) of the `Pomo`.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub length: Option<u64>,
     /// Whether this `Pomo` was abandoned.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub abandoned: Option<bool>,
     /// Whether this `Pomo` was created manually.
-    #[serde(skip_serializing_if="ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
     pub manual: Option<bool>,
 }
 
@@ -94,7 +108,8 @@ impl Default for Pomo {
             local_ended_at: None,
             length: None,
             abandoned: Some(false),
-            manual: Some(true), // For using the api, this field must be true.
+            manual: Some(true),
+            // For using the api, this field must be true.
         }
     }
 }
