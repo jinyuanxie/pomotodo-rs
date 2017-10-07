@@ -1,10 +1,6 @@
 # Pomotodo SDK for Rust Programming Language.
 
----
-
 An **unofficial** [Pomotodo][pomotodo] SDK for Rust Programming Language, base on [reqwest][reqwest].
-
----
 
 ## Usage
 
@@ -33,8 +29,6 @@ fn main() {
   println!("{}", client.account().unwrap());
 }
 ```
-
----
 
 [pomotodo]: https://pomotodo.com
 [reqwest]: https://github.com/seanmonstar/reqwest
