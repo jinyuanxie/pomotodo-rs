@@ -32,7 +32,7 @@ mod client;
 
 pub use self::account::Account;
 pub use self::pomo::{Pomo, PomoBuilder, PomoParameter};
-pub use self::todo::{Todo, SubTodo, TodoParameter};
+pub use self::todo::{Todo, SubTodo, TodoBuilder, SubTodoBuilder, TodoParameter};
 pub use self::client::Client;
 
 pub mod errors {

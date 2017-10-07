@@ -1,34 +1,40 @@
-# Unofficial [Pomotodo][1] api for Rust.
+# Pomotodo SDK for Rust Programming Language.
 
-## Description
-This is an unofficial [Pomotodo][1] api for Rust Programming Language, base on [hyper][2].
+---
 
-For more details, just boswer the code, it is very simply.
+An **unofficial** [Pomotodo][pomotodo] SDK for Rust Programming Language, base on [reqwest][reqwest].
 
-Welcome to open issue and create PR.
+---
 
-## Example
+## Usage
+
+To use `pomotodo`, first add the following to your `Cargo.toml`:
+
+```toml
+[dependencies]
+pomotodo = "0.2"
+```
+
+Then, add the following to your crate root:
+```rust
+extern crate pomotodo;
+```
+
+The following is an example to print your account information:
 
 ```rust
 extern crate pomotodo;
 
-// use pomotodo::pomo::Pomo;
-use pomotodo::session::Session;
-// use pomotodo::account::Account;
-// use pomotodo::todo::{Todo, SubTodo};
+use pomotodo::Client;
 
 fn main() {
-  let sess = Session::with_token("your_api_token").unwrap();
+  let client = Client::new("YOUR_ACCESS_TOKEN");
   
-  println!("{}", sess.get_account().unwrap());
-  
-  // ...
+  println!("{}", client.account().unwrap());
 }
 ```
 
-## License
-Please read the `LICENSE`.
+---
 
-[1]: https://pomotodo.com
-[2]: https://hyper.rs
-
+[pomotodo]: https://pomotodo.com
+[reqwest]: https://github.com/seanmonstar/reqwest

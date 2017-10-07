@@ -72,6 +72,14 @@ pub struct Todo {
     pub sub_todos: Option<Vec<Uuid>>,
 }
 
+/// A builder to construct the properties of a [`Todo`](struct.Todo.html).
+#[derive(Debug)]
+pub struct TodoBuilder {
+    todo: Todo,
+}
+
+/// The parameters used in getting [`Todo`](struct.Todo.html)s.
+#[derive(Debug)]
 pub struct TodoParameter {
     completed: Option<bool>,
     completed_later_than: Option<DateTime<Utc>>,
@@ -104,6 +112,12 @@ pub struct SubTodo {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<Utc>>,
+}
+
+/// A builder to construct the properties of a [`SubTodo`](struct.SubTodo.html).
+#[derive(Debug)]
+pub struct SubTodoBuilder {
+    sub_todo: SubTodo,
 }
 
 impl Default for Todo {
@@ -150,21 +164,81 @@ impl Default for SubTodo {
     }
 }
 
+impl Todo {
+    /// Creates an [`TodoBuilder`](struct.TodoBuilder.html)
+    /// to configure a [`Todo`](struct.Todo.html).
+    pub fn builder() -> TodoBuilder {
+        TodoBuilder { todo: Todo::default() }
+    }
+}
+
+impl TodoBuilder {
+    /// Set the `description` property.
+    pub fn description<S: Into<String>>(&mut self, desc: S) -> &mut TodoBuilder {
+        self.todo.description = desc.into();
+        self
+    }
+
+    /// Build a [`Todo`](struct.Todo.html).
+    pub fn finish(self) -> Todo {
+        self.todo
+    }
+}
+
 impl TodoParameter {
+    /// Set the `completed` parameter.
+    pub fn with_completed(&mut self, completed: bool) -> &mut TodoParameter {
+        self.completed = Some(completed);
+        self
+    }
+
+    /// Set the `completed_later_than` parameter.
+    pub fn with_completed_later(&mut self, than: DateTime<Utc>) -> &mut TodoParameter {
+        self.completed_later_than = Some(than);
+        self
+    }
+
+    /// Set the `completed_earlier_than` parameter.
+    pub fn with_completed_earlier(&mut self, than: DateTime<Utc>) -> &mut TodoParameter {
+        self.completed_earlier_than = Some(than);
+        self
+    }
+
     /// Convert [`TodoParameter`](struct.TodoParameter.html) to query string.
     pub fn to_query(&self) -> String {
-        let mut paras: Vec<String> = Vec::new();
+        let mut params: Vec<String> = Vec::new();
         if let Some(completed) = self.completed {
-            paras.push(format!("completed={}", completed));
+            params.push(format!("completed={}", completed));
         }
         if let Some(completed_later_than) = self.completed_later_than {
-            paras.push(format!("completed_later_than={}", completed_later_than));
+            params.push(format!("completed_later_than={}", completed_later_than));
         }
         if let Some(completed_earlier_than) = self.completed_earlier_than {
-            paras.push(format!("completed_earlier_than={}", completed_earlier_than));
+            params.push(format!("completed_earlier_than={}", completed_earlier_than));
         }
 
-        paras.join("&")
+        params.join("&")
+    }
+}
+
+impl SubTodo {
+    /// Creates an [`SubTodoBuilder`](struct.SubTodoBuilder.html)
+    /// to configure a [`SubTodo`](struct.SubTodo.html).
+    pub fn builder() -> SubTodoBuilder {
+        SubTodoBuilder { sub_todo: SubTodo::default() }
+    }
+}
+
+impl SubTodoBuilder {
+    /// Set the `description` property.
+    pub fn description<S: Into<String>>(&mut self, desc: S) -> &mut SubTodoBuilder {
+        self.sub_todo.description = desc.into();
+        self
+    }
+
+    /// Build a [`SubTodo`](struct.SubTodo.html).
+    pub fn finish(self) -> SubTodo {
+        self.sub_todo
     }
 }
 

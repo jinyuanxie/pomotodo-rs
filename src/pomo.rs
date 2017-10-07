@@ -54,10 +54,14 @@ pub struct Pomo {
     pub manual: Option<bool>,
 }
 
+/// A builder to construct the properties of a [`Pomo`](struct.Pomo.html).
+#[derive(Debug)]
 pub struct PomoBuilder {
     pomo: Pomo,
 }
 
+/// The parameters used in getting [`Pomo`](struct.Pomo.html)s.
+#[derive(Debug)]
 pub struct PomoParameter {
     abandoned: Option<bool>,
     manual: Option<bool>,
@@ -100,33 +104,75 @@ impl Default for PomoParameter {
 }
 
 impl Pomo {
+    /// Creates an [`PomoBuilder`](struct.PomoBuilder.html)
+    /// to configure a [`Pomo`](struct.Pomo.html).
     pub fn builder() -> PomoBuilder {
         PomoBuilder { pomo: Pomo::default() }
     }
 }
 
 impl PomoBuilder {
+    /// Set the `started_at` property.
     pub fn started_at(&mut self, time: DateTime<Utc>) -> &mut PomoBuilder {
         self.pomo.started_at = time;
         self
     }
 
+    /// Set the `end_at` property.
     pub fn ended_at(&mut self, time: DateTime<Utc>) -> &mut PomoBuilder {
         self.pomo.ended_at = time;
         self
     }
 
+    /// Set the `description` property.
     pub fn description<T: Into<String>>(&mut self, desc: T) -> &mut PomoBuilder {
         self.pomo.description = desc.into();
         self
     }
 
+    /// Build a [`Pomo`](struct.Pomo.html).
     pub fn finish(self) -> Pomo {
         self.pomo
     }
 }
 
 impl PomoParameter {
+    /// Set the `abandoned` parameter.
+    pub fn with_abandoned(&mut self, abandoned: bool) -> &mut PomoParameter {
+        self.abandoned = Some(abandoned);
+        self
+    }
+
+    /// Set the `manual` parameter.
+    pub fn with_manual(&mut self, manual: bool) -> &mut PomoParameter {
+        self.manual = Some(manual);
+        self
+    }
+
+    /// Set the `started_later_than` parameter.
+    pub fn with_started_later(&mut self, than: DateTime<Utc>) -> &mut PomoParameter {
+        self.started_later_than = Some(than);
+        self
+    }
+
+    /// Set the `started_earlier_than` parameter.
+    pub fn with_started_earlier(&mut self, than: DateTime<Utc>) -> &mut PomoParameter {
+        self.started_earlier_than = Some(than);
+        self
+    }
+
+    /// Set the `ended_later_than` parameter.
+    pub fn with_ended_later(&mut self, than: DateTime<Utc>) -> &mut PomoParameter {
+        self.ended_later_than = Some(than);
+        self
+    }
+
+    /// Set the `ended_earlier_than` parameter.
+    pub fn with_ended_earlier(&mut self, than: DateTime<Utc>) -> &mut PomoParameter {
+        self.ended_earlier_than = Some(than);
+        self
+    }
+
     /// Convert [`PomoParameter`](struct.PomoParameter.html) to query string.
     pub fn to_query(&self) -> String {
         let mut paras: Vec<String> = Vec::new();
