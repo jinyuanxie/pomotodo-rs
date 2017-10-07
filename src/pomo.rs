@@ -1,123 +1,162 @@
-//Copyright 2017 KAMYUEN
+// Copyright 2017 Kam Y. Tse
 //
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
-
-extern crate serde_json;
-
-use std::fmt;
-use std::default::Default;
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 use uuid::Uuid;
 use chrono::prelude::*;
 
-use ::ShouldSkip;
-
-#[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
+/// An pomo.
+///
+/// The required fields to create a pomo:
+///
+/// * `description`
+/// * `started_at`
+/// * `length` or `ended_at`
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Pomo {
-    /// The unique id of the `Pomo`.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<Uuid>,
-    /// The create time of the `Pomo`.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub created_at: Option<DateTime<UTC>>,
-    /// The update time of the `Pomo`.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub updated_at: Option<DateTime<UTC>>,
-    /// The description of the `Pomo`.
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+
     pub description: String,
-    /// The started time of the `Pomo`.
-    pub started_at: DateTime<UTC>,
-    /// The ended time of the `Pomo`.
-    pub ended_at: DateTime<UTC>,
-    /// The local started time of the `Pomo`.
-    /// Notice: **Stored in UTC format.**
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub local_started_at: Option<DateTime<UTC>>,
-    /// The local ended time of the `Pomo`.
-    /// Notice: **Store in UTC format.**
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub local_ended_at: Option<DateTime<UTC>>,
-    /// The duration(in second) of the `Pomo`.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    pub started_at: DateTime<Utc>,
+
+    pub ended_at: DateTime<Utc>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub local_started_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub local_ended_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub length: Option<u64>,
-    /// Whether this `Pomo` was abandoned.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub abandoned: Option<bool>,
-    /// Whether this `Pomo` was created manually.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub manual: Option<bool>,
 }
 
+pub struct PomoBuilder {
+    pomo: Pomo,
+}
+
+pub struct PomoParameter {
+    abandoned: Option<bool>,
+    manual: Option<bool>,
+    started_later_than: Option<DateTime<Utc>>,
+    started_earlier_than: Option<DateTime<Utc>>,
+    ended_later_than: Option<DateTime<Utc>>,
+    ended_earlier_than: Option<DateTime<Utc>>,
+}
+
 impl Default for Pomo {
-    /// The default value of a new `Pomo`.
-    ///
-    /// **Required fields:**
-    ///
-    /// - `description`
-    /// - `started_at`
-    /// - `length` or `ended_at`
-    ///
-    /// The result of a POST request with _empty body_
-    ///
-    /// ``` json
-    /// {
-    ///   "code": "InvalidContent",
-    ///   "message": "Validation failed",
-    ///   "description": "Validation failed",
-    ///   "errors": [
-    ///    {
-    ///       "path": "started_at",
-    ///       "type": "missing_field",
-    ///       "message": "\"started_at\" is required"
-    ///    },
-    ///    {
-    ///       "path": "description",
-    ///       "type": "missing_field",
-    ///       "message": "\"description\" is required"
-    ///     },
-    ///     {
-    ///         "path": "value",
-    ///         "type": "invalid",
-    ///         "message": "\"value\" must contain at least one of [length, ended_at]"
-    ///     }
-    ///    ],
-    ///    "documentation_url": "https://pomotodo.com/developer"
-    /// }
-    /// ```
-    ///
-    /// Read more: [CreatePomo](https://pomotodo.github.io/api-doc/#api-Pomo-CreatePomo)
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn default() -> Pomo {
         Pomo {
-            uuid: None,
-            created_at: None,
-            updated_at: None,
-            description: "New Pomo".to_string(),
-            started_at: UTC::now(),
-            ended_at: UTC::now(),
+            uuid:             None,
+            created_at:       None,
+            updated_at:       None,
+            description:      "New Pomo via Rust client".to_string(),
+            started_at:       Utc::now(),
+            ended_at:         Utc::now(),
             local_started_at: None,
-            local_ended_at: None,
-            length: None,
-            abandoned: Some(false),
-            manual: Some(true),
-            // For using the api, this field must be true.
+            local_ended_at:   None,
+            length:           None,
+            abandoned:        Some(false),
+            manual:           Some(true),
         }
     }
 }
 
-impl fmt::Display for Pomo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
-               serde_json::to_string_pretty(self).unwrap_or_default())
+impl Default for PomoParameter {
+    fn default() -> PomoParameter {
+        PomoParameter {
+            abandoned: Some(false),
+            manual: Some(false),
+            started_later_than: None,
+            started_earlier_than: None,
+            ended_later_than: None,
+            ended_earlier_than: None,
+        }
+    }
+}
+
+impl Pomo {
+    pub fn builder() -> PomoBuilder {
+        PomoBuilder { pomo: Pomo::default() }
+    }
+}
+
+impl PomoBuilder {
+    pub fn started_at(&mut self, time: DateTime<Utc>) -> &mut PomoBuilder {
+        self.pomo.started_at = time;
+        self
+    }
+
+    pub fn ended_at(&mut self, time: DateTime<Utc>) -> &mut PomoBuilder {
+        self.pomo.ended_at = time;
+        self
+    }
+
+    pub fn description<T: Into<String>>(&mut self, desc: T) -> &mut PomoBuilder {
+        self.pomo.description = desc.into();
+        self
+    }
+
+    pub fn finish(self) -> Pomo {
+        self.pomo
+    }
+}
+
+impl PomoParameter {
+    /// Convert [`PomoParameter`](struct.PomoParameter.html) to query string.
+    pub fn to_query(&self) -> String {
+        let mut paras: Vec<String> = Vec::new();
+
+        if let Some(abandoned) = self.abandoned {
+            paras.push(format!("abandoned={}", abandoned));
+        }
+        if let Some(manual) = self.manual {
+            paras.push(format!("manual={}", manual));
+        }
+        if let Some(started_later_than) = self.started_later_than {
+            paras.push(format!("started_later_than={}", started_later_than));
+        }
+        if let Some(started_earlier_than) = self.started_earlier_than {
+            paras.push(format!("started_earlier_than={}", started_earlier_than));
+        }
+        if let Some(ended_later_than) = self.ended_later_than {
+            paras.push(format!("ended_later_than={}", ended_later_than));
+        }
+        if let Some(ended_earlier_than) = self.ended_earlier_than {
+            paras.push(format!("ended_earlier_than={}", ended_earlier_than));
+        }
+
+        paras.join("&")
+    }
+}
+
+impl ::std::fmt::Display for Pomo {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        use serde_json::to_string_pretty;
+        write!(f, "{}", to_string_pretty(self).unwrap_or_default())
     }
 }

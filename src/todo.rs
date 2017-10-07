@@ -1,33 +1,22 @@
-//Copyright 2017 KAMYUEN
+// Copyright 2017 Kam Y. Tse
 //
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
-
-//! The todo module.
-extern crate serde_json;
-
-use std::io;
-use std::fmt;
-use std::str::FromStr;
-use std::default::Default;
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 use uuid::Uuid;
 use chrono::prelude::*;
 
-use ::ShouldSkip;
-
-/// The repeat type of the `Todo` task.
-#[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all="snake_case")]
+/// The repeat type of [`Todo`](struct.Todo.html).
+#[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum RepeatType {
     None,
     EachDay,
@@ -37,109 +26,93 @@ pub enum RepeatType {
     EachYear,
 }
 
-impl FromStr for RepeatType {
-    type Err = io::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "none" => Ok(RepeatType::None),
-            "each_day" => Ok(RepeatType::EachDay),
-            "each_week" => Ok(RepeatType::EachWeek),
-            "each_two_week" => Ok(RepeatType::EachTwoWeek),
-            "each_month" => Ok(RepeatType::EachMonth),
-            "each_year" => Ok(RepeatType::EachYear),
-            _ => Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid repeat type.")),
-        }
-    }
-}
-
-impl fmt::Display for RepeatType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            RepeatType::None => write!(f, "none"),
-            RepeatType::EachDay => write!(f, "each_day"),
-            RepeatType::EachWeek => write!(f, "each_week"),
-            RepeatType::EachTwoWeek => write!(f, "each_two_week"),
-            RepeatType::EachMonth => write!(f, "each_month"),
-            RepeatType::EachYear => write!(f, "each_year"),
-        }
-    }
-}
-
-/// A `Todo` task.
-#[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
+/// A [`Todo`](struct.Todo.html).
+///
+/// The required fields to create a [`Todo`](struct.Todo.html):
+///
+/// * `description`
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Todo {
-    /// The unique id of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<Uuid>,
-    /// The create time of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub created_at: Option<DateTime<UTC>>,
-    /// The update time of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub updated_at: Option<DateTime<UTC>>,
-    /// The description of the task.
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+
     pub description: String,
-    /// Whether notice the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub notice: Option<String>,
-    /// Whether pin the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub pin: Option<bool>,
-    /// Whether the task was completed.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed: Option<bool>,
-    /// The completed time of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub completed_at: Option<DateTime<UTC>>,
-    /// The `RepeatType` of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub repeat_type: Option<RepeatType>,
-    /// When remind the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub remind_time: Option<DateTime<UTC>>,
-    /// How many `Pomo` to finish this task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remind_time: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub estimated_pomo_count: Option<u64>,
-    /// The costed `Pomo` in doing this task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub costed_pomo_count: Option<u64>,
-    /// The sub task of this task.
+
     #[serde(skip_serializing)]
     pub sub_todos: Option<Vec<Uuid>>,
 }
 
+pub struct TodoParameter {
+    completed: Option<bool>,
+    completed_later_than: Option<DateTime<Utc>>,
+    completed_earlier_than: Option<DateTime<Utc>>,
+}
+
+/// A [`SubTodo`](struct.SubTodo.html).
+///
+/// The required fields to create a [`SubTodo`](struct.SubTodo.html):
+///
+/// * `description`
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct SubTodo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<Uuid>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_uuid: Option<Uuid>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub description: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<DateTime<Utc>>,
+}
+
 impl Default for Todo {
-    /// The default value of a new `Todo` task.
-    ///
-    /// **Required fields:**
-    ///
-    /// - `description`
-    ///
-    /// The result of a POST request with _empty body_
-    ///
-    /// ``` json
-    /// {
-    ///    "code": "InvalidContent",
-    ///    "message": "Validation failed",
-    ///    "description": "Validation failed",
-    ///    "errors": [
-    ///     {
-    ///        "path": "description",
-    ///        "type": "missing_field",
-    ///        "message": "\"description\" is required"
-    ///     }
-    ///    ],
-    ///    "documentation_url": "https://pomotodo.com/developer"
-    /// }
-    /// ```
-    ///
-    /// Read more: [CreateTodo](https://pomotodo.github.io/api-doc/#api-Todo-CreateTodos)
     fn default() -> Todo {
         Todo {
             uuid: None,
             created_at: None,
             updated_at: None,
-            description: "New Todo Item".to_string(),
+            description: "New Todo Item via Rust client".to_owned(),
             notice: None,
             pin: None,
             completed: None,
@@ -153,82 +126,91 @@ impl Default for Todo {
     }
 }
 
-impl fmt::Display for Todo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
-               serde_json::to_string_pretty(self).unwrap_or_default())
+impl Default for TodoParameter {
+    fn default() -> TodoParameter {
+        TodoParameter {
+            completed: Some(false),
+            completed_later_than: None,
+            completed_earlier_than: None,
+        }
     }
 }
 
-/// A `SubTodo` task.
-#[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
-pub struct SubTodo {
-    /// The unique id of the sub task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub uuid: Option<Uuid>,
-    /// The unique id of the parent task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub parent_uuid: Option<Uuid>,
-    /// The create time of the sub task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub created_at: Option<DateTime<UTC>>,
-    /// The update time of the sub task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub updated_at: Option<DateTime<UTC>>,
-    /// The description of the sub task
-    pub description: String,
-    /// Whether the task was completed.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub completed: Option<bool>,
-    /// The completed time of the task.
-    #[serde(skip_serializing_if = "ShouldSkip::should_skip")]
-    pub completed_at: Option<DateTime<UTC>>,
-}
-
 impl Default for SubTodo {
-    /// The default value of a new `SubTodo` task.
-    ///
-    /// **Required fields:**
-    ///
-    /// - `description`
-    ///
-    /// The result of a POST request with _empty body_
-    ///
-    /// ``` json
-    /// {
-    ///    "code": "InvalidContent",
-    ///    "message": "Validation failed",
-    ///    "description": "Validation failed",
-    ///    "errors": [
-    ///     {
-    ///        "path": "description",
-    ///        "type": "missing_field",
-    ///        "message": "\"description\" is required"
-    ///     }
-    ///    ],
-    ///    "documentation_url": "https://pomotodo.com/developer"
-    /// }
-    /// ```
-    ///
-    /// Read more: [CreateTodo](https://pomotodo.github.io/api-doc/#api-Todo-CreateTodos)
     fn default() -> SubTodo {
         SubTodo {
             uuid: None,
             parent_uuid: None,
             created_at: None,
             updated_at: None,
-            description: "New SubTodo Item".to_string(),
+            description: "New SubTodo Item via Rust client".to_owned(),
             completed: None,
             completed_at: None,
         }
     }
 }
 
-impl fmt::Display for SubTodo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "{}",
-               serde_json::to_string_pretty(self).unwrap_or_default())
+impl TodoParameter {
+    /// Convert [`TodoParameter`](struct.TodoParameter.html) to query string.
+    pub fn to_query(&self) -> String {
+        let mut paras: Vec<String> = Vec::new();
+        if let Some(completed) = self.completed {
+            paras.push(format!("completed={}", completed));
+        }
+        if let Some(completed_later_than) = self.completed_later_than {
+            paras.push(format!("completed_later_than={}", completed_later_than));
+        }
+        if let Some(completed_earlier_than) = self.completed_earlier_than {
+            paras.push(format!("completed_earlier_than={}", completed_earlier_than));
+        }
+
+        paras.join("&")
+    }
+}
+
+impl ::std::str::FromStr for RepeatType {
+    type Err = ::std::io::Error;
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "none"          => Ok(RepeatType::None),
+            "each_day"      => Ok(RepeatType::EachDay),
+            "each_week"     => Ok(RepeatType::EachWeek),
+            "each_two_week" => Ok(RepeatType::EachTwoWeek),
+            "each_month"    => Ok(RepeatType::EachMonth),
+            "each_year"     => Ok(RepeatType::EachYear),
+            _ => Err(::std::io::Error::new(
+                ::std::io::ErrorKind::InvalidData,
+                "invalid repeat type",
+            )),
+        }
+    }
+}
+
+impl ::std::fmt::Display for RepeatType {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match *self {
+            RepeatType::None        => write!(f, "none"),
+            RepeatType::EachDay     => write!(f, "each_day"),
+            RepeatType::EachWeek    => write!(f, "each_week"),
+            RepeatType::EachTwoWeek => write!(f, "each_two_week"),
+            RepeatType::EachMonth   => write!(f, "each_month"),
+            RepeatType::EachYear    => write!(f, "each_year"),
+        }
+    }
+}
+
+impl ::std::fmt::Display for Todo {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        use serde_json::to_string_pretty;
+        write!(f, "{}", to_string_pretty(self).unwrap_or_default())
+    }
+}
+
+impl ::std::fmt::Display for SubTodo {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        use serde_json::to_string_pretty;
+        write!(f, "{}", to_string_pretty(self).unwrap_or_default())
     }
 }
