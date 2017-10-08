@@ -14,13 +14,24 @@
 use uuid::Uuid;
 use chrono::prelude::*;
 
-/// An pomo.
+/// An `Pomo`.
 ///
-/// The required fields to create a pomo:
+/// The required fields to create a `Pomo`:
 ///
 /// * `description`
 /// * `started_at`
-/// * `length` or `ended_at`
+/// * `ended_at` or `length`
+///
+/// **Note:** If specify both `ended_at` and `length`, the `length`
+/// will be droppd and recalculated.
+///
+/// Not allowed fields in creating a `Pomo`:
+///
+/// * `uuid`
+/// * `created_at`
+/// * `updated_at`
+///
+/// Others will be keep their values except the `manual`, it MUST be `true`.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Pomo {
     #[serde(skip_serializing_if = "Option::is_none")]

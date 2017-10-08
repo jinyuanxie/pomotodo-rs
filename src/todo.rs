@@ -26,11 +26,29 @@ pub enum RepeatType {
     EachYear,
 }
 
-/// A [`Todo`](struct.Todo.html).
+/// A `Todo`.
 ///
-/// The required fields to create a [`Todo`](struct.Todo.html):
+/// The required fields to create a `Todo`:
 ///
 /// * `description`
+///
+/// The optional fields to create a `Todo`:
+///
+/// * `notice`
+/// * `pin`
+/// * `completed`
+/// * `completed_at`
+/// * `repeat_type`
+/// * `remind_time`
+/// * `estimated_pomo_count`
+/// * `costed_pomo_count`
+///
+/// Not allowed fields in creating a pomo:
+///
+/// * `uuid`
+/// * `created_at`
+/// * `updated_at`
+/// * `sub_todos`
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Todo {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -86,11 +104,17 @@ pub struct TodoParameter {
     completed_earlier_than: Option<DateTime<Utc>>,
 }
 
-/// A [`SubTodo`](struct.SubTodo.html).
+/// A `SubTodo`.
 ///
-/// The required fields to create a [`SubTodo`](struct.SubTodo.html):
+/// The required fields to create a `SubTodo`:
 ///
 /// * `description`
+///
+/// The optional fields to create a `SubTodo`:
+///
+/// * `parent_uuid` (allowed, but will be dropped)
+/// * `completed`
+/// * `completed_at`
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SubTodo {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -165,8 +189,7 @@ impl Default for SubTodo {
 }
 
 impl Todo {
-    /// Creates an [`TodoBuilder`](struct.TodoBuilder.html)
-    /// to configure a [`Todo`](struct.Todo.html).
+    /// Creates an `TodoBuilder` to configure a [`Todo`](struct.Todo.html).
     pub fn builder() -> TodoBuilder {
         TodoBuilder { todo: Todo::default() }
     }

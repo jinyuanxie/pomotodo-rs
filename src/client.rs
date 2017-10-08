@@ -68,18 +68,18 @@ impl Client {
         }
     }
 
-    /// Request for the [`Account`](struct.Account.html)'s profile.
+    /// Request for the `Account`'s profile.
     pub fn account(&self) -> Result<Account, Error> {
         self.get(INFO_URL)
     }
 
-    /// Request for the [`Pomo`](struct.Pomo.html) specified by `uuid`.
+    /// Request for the `Pomo` specified by `uuid`.
     pub fn pomo<U: Into<Uuid>>(&self, uuid: U) -> Result<Pomo, Error> {
         let url = format!("{}/{}", POMO_URL, uuid.into());
         self.get(url.as_str())
     }
 
-    /// Request for all [`Pomo`](struct.Pomo.html) that matched the `param`.
+    /// Request for all `Pomo` that matched the `param`.
     pub fn pomos(&self, param: PomoParameter) -> Result<Vec<Pomo>, Error> {
         let query = param.to_query();
         let url = if !query.is_empty() {
@@ -91,31 +91,37 @@ impl Client {
         self.get(url.as_str())
     }
 
-    /// Submit a new [`Pomo`](struct.Pomo.html) to server.
+    /// Submit a new `Pomo` to server.
     pub fn submit_pomo(&self, pomo: &Pomo) -> Result<Pomo, Error> {
         self.post(POMO_URL, pomo)
     }
 
-    // TODO: The parameter of the patch (update) should do more test
-    pub fn update_pomo<U, S>(&self, _: U, _: S) -> Result<Pomo, Error>
+    /// Request server to update an existed `Pomo`,
+    /// only allow to update the `description`.
+    pub fn update_pomo<U, S>(&self, uuid: U, desc: S) -> Result<Pomo, Error>
         where U: Into<Uuid>, S: Into<String>
     {
-        unimplemented!();
+        let url = format!("{}/{}", POMO_URL, uuid.into());
+        let json = json!({
+            "description": desc.into(),
+        });
+
+        self.patch(url.as_str(), &json)
     }
 
-    /// Requests server to delete the [`Pomo`](struct.Pomo.html) specified by `uuid`.
+    /// Requests server to delete the `Pomo` specified by `uuid`.
     pub fn delete_pomo<U: Into<Uuid>>(&self, uuid: U) -> Result<(), Error> {
         let url = format!("{}/{}", POMO_URL, uuid.into());
         self.delete(url.as_str())
     }
 
-    /// Request for the [`Todo`](struct.Todo.html) specified by `uuid`.
+    /// Request for the `Todo` specified by `uuid`.
     pub fn todo<U: Into<Uuid>>(&self, uuid: U) -> Result<Todo, Error> {
         let url = format!("{}/{}", TODO_URL, uuid.into());
         self.get(url.as_str())
     }
 
-    /// Request for all [`Todo`](struct.Todo.html) that matched the `param`.
+    /// Request for all `Todo` that match with the `param`.
     pub fn todos(&self, param: TodoParameter) -> Result<Vec<Todo>, Error> {
         let query = param.to_query();
         let url = if !query.is_empty() {
@@ -127,37 +133,51 @@ impl Client {
         self.get(url.as_str())
     }
 
-    /// Requests server to creates a new [`Todo`](struct.Todo.html).
+    /// Requests server to creates a new `Todo`.
     pub fn create_todo(&self, todo: &Todo) -> Result<Todo, Error> {
         self.post(TODO_URL, todo)
     }
 
-    // TODO: The parameter of the patch (update) should do more test
-    pub fn update_todo<U: Into<Uuid>>(&self, _: U, _: &Todo) -> Result<Todo, Error> {
-        unimplemented!();
+    /// Request server to update an existed `Todo`.
+    ///
+    /// The fields allowed to be updated:
+    ///
+    /// * `description`
+    /// * `notice`
+    /// * `pin`
+    /// * `completed`
+    /// * `completed_at`
+    /// * `repeat_type`
+    /// * `remind_time`
+    /// * `estimated_pomo_count`
+    /// * `costed_pomo_count`
+    pub fn update_todo<U: Into<Uuid>>(&self, uuid: U, todo: &Todo) -> Result<Todo, Error> {
+        let url = format!("{}/{}", TODO_URL, uuid.into());
+
+        // TODO: Validate the item
+        self.patch(url.as_str(), todo)
     }
 
-    /// Requests server to delete the [`Todo`](struct.Todo.html) specified by `uuid`.
+    /// Requests server to delete the `Todo` specified by `uuid`.
     pub fn delete_todo<U: Into<Uuid>>(&self, uuid: U) -> Result<(), Error> {
         let url = format!("{}/{}", TODO_URL, uuid.into());
         self.delete(url.as_str())
     }
 
-    /// Request for the [`SubTodo`](struct.SubTodo.html)
-    /// owned by `parent` and had the `uuid`.
+    /// Request for the `SubTodo` owned by `parent` and has the `uuid`.
     pub fn subtodo<U: Into<Uuid>>(&self, parent: U, uuid: U) -> Result<SubTodo, Error> {
         let url = format!("{}/{}/sub_todos/{}", TODO_URL, parent.into(), uuid.into());
         self.get(url.as_str())
     }
 
-    /// Request for all [`SubTodo`](struct.SubTodo.html) owned by `parent`.
+    /// Request for all `SubTodo` owned by `parent`.
     pub fn subtodos<U: Into<Uuid>>(&self, parent: U) -> Result<Vec<SubTodo>, Error> {
         let url = format!("{}/{}/sub_todos", TODO_URL, parent.into());
         self.get(url.as_str())
     }
 
-    /// Requests server to create a new [`SubTodo`](struct.SubTodo.html)
-    /// under the [`Todo`](struct.Todo.html) specified by `parent`.
+    /// Requests server to create a new `SubTodo` under the
+    /// [`Todo`](struct.Todo.html) specified by `parent`.
     pub fn create_subtodo<U: Into<Uuid>>(
         &self,
         parent: U,
@@ -167,9 +187,24 @@ impl Client {
         self.post(url.as_str(), sub_todo)
     }
 
-    // TODO: The parameter of the patch (update) should do more test
-    pub fn update_subtodo<U: Into<Uuid>>(&self, _: U, _: U, _: &SubTodo) -> Result<SubTodo, Error> {
-        unimplemented!();
+    /// Request server to update an existed `SubTodo`.
+    ///
+    /// The fields allowed to be updated:
+    ///
+    /// * `description`
+    /// * `parent_uuid` (allowed, but will be dropped)
+    /// * `completed`
+    /// * `completed_at`
+    pub fn update_subtodo<U: Into<Uuid>>(
+        &self,
+        parent: U,
+        uuid: U,
+        sub_todo: &SubTodo,
+    ) -> Result<SubTodo, Error> {
+        let url = format!("{}/{}/sub_todos/{}", TODO_URL, parent.into(), uuid.into());
+
+        // TODO: Validate the item
+        self.patch(url.as_str(), sub_todo)
     }
 
     /// Requests server to delete the [`SubTodo`](struct.Todo.html)
@@ -180,8 +215,8 @@ impl Client {
     }
 
     /// An wrap of `reqwest::Client::request` to make request with json body.
-    fn request<U, T>(&self, method: Method, url: U, json: Option<&T>) -> Result<Response, Error>
-        where U: IntoUrl, T: Serialize + DeserializeOwned
+    fn request<U, I>(&self, method: Method, url: U, json: Option<&I>) -> Result<Response, Error>
+        where U: IntoUrl, I: Serialize
     {
         let mut request = self.inner.request(method, url);
         if let Some(json) = json {
@@ -196,23 +231,31 @@ impl Client {
             .and_then(|resp| if resp.status() == StatusCode::Ok {
                           Ok(resp)
                       } else {
-                          Err(Error::from(ErrorKind::Unexcept("server redirect".to_owned())))
+                          Err(Error::from(ErrorKind::Msg("server redirect".to_owned())))
                       })
     }
 
+    /// Convenience method to make a GET request body to a URL.
+    fn get<U, O>(&self, url: U) -> Result<O, Error>
+        where U: IntoUrl, O: DeserializeOwned
+    {
+        self.request::<_, ()>(Method::Get, url, None)
+            .and_then(|mut resp| resp.json().map_err(|e| e.into()))
+    }
+
     /// Convenience method to make a POST request with json body to a URL.
-    fn post<U, T>(&self, url: U, json: &T) -> Result<T, Error>
-        where U: IntoUrl, T: Serialize + DeserializeOwned
+    fn post<U, I, O>(&self, url: U, json: &I) -> Result<O, Error>
+        where U: IntoUrl, I: Serialize, O: DeserializeOwned
     {
         self.request(Method::Post, url, Some(json))
             .and_then(|mut resp| resp.json().map_err(|e| e.into()))
     }
 
-    /// Convenience method to make a GET request body to a URL.
-    fn get<U, T>(&self, url: U) -> Result<T, Error>
-        where U: IntoUrl, T: Serialize + DeserializeOwned
+    /// Convenience method to make a PATCH request with json body to a URL.
+    fn patch<U, I, O>(&self, url: U, json: &I) -> Result<O, Error>
+        where U: IntoUrl, I: Serialize, O: DeserializeOwned
     {
-        self.request::<_, T>(Method::Get, url, None)
+        self.request(Method::Patch, url, Some(json))
             .and_then(|mut resp| resp.json().map_err(|e| e.into()))
     }
 

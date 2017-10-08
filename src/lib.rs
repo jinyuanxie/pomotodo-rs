@@ -19,6 +19,7 @@ extern crate uuid;
 extern crate serde;
 extern crate chrono;
 extern crate reqwest;
+#[macro_use]
 extern crate serde_json;
 #[macro_use]
 extern crate error_chain;
@@ -35,6 +36,7 @@ pub use self::pomo::{Pomo, PomoBuilder, PomoParameter};
 pub use self::todo::{Todo, SubTodo, TodoBuilder, SubTodoBuilder, TodoParameter};
 pub use self::client::Client;
 
+/// The Errors that may occur when communicating with Pomotodo server.
 pub mod errors {
     error_chain! {
         types {
@@ -42,15 +44,7 @@ pub mod errors {
         }
 
         foreign_links {
-            Io(::std::io::Error);
             ReqError(::reqwest::Error);
-        }
-
-        errors {
-            Unexcept(desc: String) {
-                description("Unexcept error"),
-                display("Unexcept error: {}", desc)
-            }
         }
     }
 }
